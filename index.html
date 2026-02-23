@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>KALKULATOR PASAL HOPIXEL</title>
+
+<style>
+:root{
+--bg:#eef2f7;
+--card:#ffffff;
+--text:#222;
+--primary:#1f3c88;
+}
+
+.dark{
+--bg:#1e1e1e;
+--card:#2a2a2a;
+--text:#f5f5f5;
+--primary:#3a6cf4;
+}
+
+body{
+background:var(--bg);
+font-family:Arial, sans-serif;
+margin:0;
+padding:20px;
+color:var(--text);
+}
+
+h1{
+text-align:center;
+margin-bottom:5px;
+}
+
+.author{
+text-align:center;
+font-weight:bold;
+color:black;
+margin-bottom:15px;
+}
+
+.top-controls{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+margin-bottom:15px;
+}
+
+input, select{
+padding:8px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+padding:8px 14px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:var(--primary);
+color:white;
+}
+
+.card{
+background:var(--card);
+padding:15px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+overflow:auto;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+}
+
+th, td{
+border:1px solid #ddd;
+padding:6px;
+}
+
+th{
+background:var(--primary);
+color:white;
+}
+
+.ringan{ background:#f7f1c8; }
+.sedang{ background:#cde8f6; }
+.berat{ background:#f6c5c5; }
+
+.total{
+margin-top:15px;
+font-size:16px;
+font-weight:bold;
+}
+
+@media(max-width:768px){
+table{font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<h1>KALKULATOR PASAL HOPIXEL</h1>
+<div class="author">Author: PaceMarcel</div>
+
+<div class="top-controls">
+<input type="text" id="nama" placeholder="Nama Tersangka">
+<input type="text" id="search" placeholder="Cari Pasal...">
+<select id="filter">
+<option value="all">Semua Kategori</option>
+<option value="ringan">Ringan</option>
+<option value="sedang">Sedang</option>
+<option value="berat">Berat</option>
+</select>
+<button onclick="toggleMode()">Dark/Light</button>
+<button onclick="copyHasil()">Copy</button>
+<button onclick="resetForm()">Reset</button>
+</div>
+
+<div class="card">
+<table id="pasalTable">
+<thead>
+<tr>
+<th>Pilih</th>
+<th>Pasal</th>
+<th>Pelanggaran</th>
+<th>Denda</th>
+<th>Hukuman</th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="ringan"><td><input type="checkbox" class="pasal" data-denda="5000" data-bulan="5"></td><td>0.1</td><td>Tidak Memiliki SIM</td><td>5.000</td><td>5 Bulan</td></tr>
+<tr class="ringan"><td><input type="checkbox" class="pasal" data-denda="10000" data-bulan="5"></td><td>0.3</td><td>Upaya Menyogok Petugas</td><td>10.000</td><td>5 Bulan</td></tr>
+<tr class="sedang"><td><input type="checkbox" class="pasal" data-denda="20000" data-bulan="15"></td><td>2.7</td><td>Perampokan Warga</td><td>20.000</td><td>15 Bulan</td></tr>
+<tr class="berat"><td><input type="checkbox" class="pasal" data-denda="50000" data-bulan="120"></td><td>4.9</td><td>Membawa 3 Senjata Ilegal</td><td>50.000</td><td>120 Bulan</td></tr>
+<tr class="berat"><td><input type="checkbox" class="pasal" data-denda="0" data-bulan="999"></td><td>5.3</td><td>Tindakan Terorisme</td><td>Tahanan Kota</td><td>Hukuman Mati</td></tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="total">
+Total Denda: $ <span id="totalDenda">0</span> |
+Total Hukuman: <span id="totalBulan">0</span>
+</div>
+
+<script>
+const checkboxes = document.querySelectorAll(".pasal");
+
+checkboxes.forEach(cb => cb.addEventListener("change", hitung));
+
+function hitung(){
+let totalDenda = 0;
+let totalBulan = 0;
+
+document.querySelectorAll(".pasal:checked").forEach(item=>{
+totalDenda += parseInt(item.dataset.denda);
+totalBulan += parseInt(item.dataset.bulan);
+});
+
+if(totalBulan > 120 && totalBulan < 999){
+totalBulan = 120;
+}
+
+document.getElementById("totalDenda").innerText = totalDenda.toLocaleString("id-ID");
+document.getElementById("totalBulan").innerText = totalBulan >= 999 ? "Hukuman Mati / Pengadilan" : totalBulan + " Bulan";
+}
+
+function resetForm(){
+checkboxes.forEach(el=>el.checked=false);
+document.getElementById("totalDenda").innerText=0;
+document.getElementById("totalBulan").innerText=0;
+}
+
+function copyHasil(){
+let nama=document.getElementById("nama").value;
+let denda=document.getElementById("totalDenda").innerText;
+let bulan=document.getElementById("totalBulan").innerText;
+
+let text="Nama: "+nama+
+"\nTotal Denda: $"+denda+
+"\nTotal Hukuman: "+bulan;
+
+navigator.clipboard.writeText(text);
+alert("Berhasil di copy!");
+}
+
+function toggleMode(){
+document.body.classList.toggle("dark");
+}
+
+document.getElementById("search").addEventListener("keyup", function(){
+let value=this.value.toLowerCase();
+document.querySelectorAll("#pasalTable tbody tr").forEach(row=>{
+row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+});
+});
+
+document.getElementById("filter").addEventListener("change", function(){
+let value=this.value;
+document.querySelectorAll("#pasalTable tbody tr").forEach(row=>{
+if(value==="all"){
+row.style.display="";
+}else{
+row.style.display = row.classList.contains(value) ? "" : "none";
+}
+});
+});
+</script>
+
+</body>
+</html>
